@@ -25,7 +25,7 @@ Our assignment was to allow an Internet browser to interact with ROS.
 ####How We Did It
 On a computer with a ROS active node, we used `rosbridge` to connect to WebSocket, a protocol that allows remote devices to communicate to a web browser, to connect to a website. In our website's HTML file, we import the necessary Javascript libraries such as `roslibjs` to write certain ROS functions for the HTML website.
 
-We found code on [this site, Iguanatronics](http://iguanatronics.com/igtron/?p=313), that showed how to create an HTML webpage on our local computer to control the `Turtlesim` with, via the `turtle_teleop_key` node. This meant the first part of our assignment was very easy. 
+We found code on this site, [Iguanatronics](http://iguanatronics.com/igtron/?p=313), that showed how to create an HTML webpage on our local computer to control the `Turtlesim` with, via the `turtle_teleop_key` node. This meant that learning to publish and subscirbe to messages was easy. We are currently figuring out how to set parameters.
 
 However, we also tried to:
 1. Put the HTML webpage online
