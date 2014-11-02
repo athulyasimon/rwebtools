@@ -44,7 +44,7 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
 
   // These lines create a topic object as defined by roslibjs
   var cmdVelTopic = new ROSLIB.Topic({
-    ros : rbServer,
+    ros : rbServer, //rbServer comes from ROSLIB.Ros in line 19
     name : '/turtle1/cmd_vel',
     messageType : 'geometry_msgs/Twist'
   });
@@ -63,6 +63,47 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
       z : 0.0
     }
   });
+
+    // Calling a service
+  // -----------------
+
+  var clearBackground = new ROSLIB.Service({
+    ros : rbServer,
+    name : '/clear',
+    serviceType : 'std_srvs/Empty'
+  });
+
+  var request = new ROSLIB.ServiceRequest({
+   
+  });
+
+  
+
+  // Getting and setting a param value
+  // ---------------------------------
+
+  /*rbServer.getParams(function(params) {
+    console.log(params);
+  });*/
+
+  var redRGBval = new ROSLIB.Param({
+    ros : rbServer,
+    name : 'background_r'
+  });
+
+  var greenRGBval = new ROSLIB.Param({
+    ros : rbServer,
+    name : 'background_g'
+  });
+
+  var blueRGBval = new ROSLIB.Param({
+    ros : rbServer,
+    name : 'background_b'
+  });
+
+  
+
+  
 
   /* This function:
 	- retrieves numeric values from the text boxes
@@ -83,13 +124,46 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
     linearX = 0 + Number(document.getElementById('linearXText').value);
     angularZ = 0 + Number(document.getElementById('angularZText').value);
 
+    //setting background color for turtlesim
+    redcolorRGB = 0 + Number(document.getElementById('redRGB').value);
+    greencolorRGB = 0 + Number(document.getElementById('greenRGB').value);
+    bluecolorRGB = 0 + Number(document.getElementById('blueRGB').value);
+
     // Set the appropriate values on the message object
     twist.linear.x = linearX;
     twist.angular.z = angularZ;
 
+      
+
     // Publish the message 
     cmdVelTopic.publish(twist);
-  }
+
+    // Set parameters
+    redRGBval.set(redcolorRGB);
+    greenRGBval.set(greencolorRGB);
+    blueRGBval.set(bluecolorRGB);
+  
+
+    redRGBval.get(function(value) {
+    console.log('Red RGB VAL: ' + value);
+    });
+
+    greenRGBval.get(function(value) {
+    console.log('Green RGB VAL: ' + value);
+    });
+
+    blueRGBval.get(function(value) {
+    console.log('Blue RGB VAL: ' + value);
+    });
+
+    clearBackground.callService(request, function(result) {
+    console.log(result);
+    });
+
+      
+  };
+
+
 
 </script>
 </head>
@@ -100,6 +174,9 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
 <table>
     <tr><td>Linear X</td><td><input id="linearXText" name="linearXText" type="text" value="1.5"/></td></tr>
     <tr><td>Angular Z</td><td><input id="angularZText" name="angularZText" type="text" value="1.5"/></td></tr>
+    <tr><td>Red RGB value</td><td><input id="redRGB" name="redRGB" type="text" value="69"/></td></tr>
+    <tr><td>Green RGB value</td><td><input id="greenRGB" name="greenRGB" type="text" value="86"/></td></tr>
+    <tr><td>Blue RGB value</td><td><input id="blueRGB" name="blueRGB" type="text" value="255"/></td></tr>
 </table>
 <button id="sendMsg" type="button" onclick="pubMessage()">Publish Message</button>
 </form>
