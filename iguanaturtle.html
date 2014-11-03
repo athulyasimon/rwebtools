@@ -124,10 +124,7 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
     linearX = 0 + Number(document.getElementById('linearXText').value);
     angularZ = 0 + Number(document.getElementById('angularZText').value);
 
-    //setting background color for turtlesim
-    redcolorRGB = 0 + Number(document.getElementById('redRGB').value);
-    greencolorRGB = 0 + Number(document.getElementById('greenRGB').value);
-    bluecolorRGB = 0 + Number(document.getElementById('blueRGB').value);
+    
 
     // Set the appropriate values on the message object
     twist.linear.x = linearX;
@@ -138,7 +135,18 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
     // Publish the message 
     cmdVelTopic.publish(twist);
 
-    // Set parameters
+       
+  };
+
+
+  function backgroundMessage(){
+
+    //setting background color for turtlesim
+    redcolorRGB = 0 + Number(document.getElementById('redRGB').value);
+    greencolorRGB = 0 + Number(document.getElementById('greenRGB').value);
+    bluecolorRGB = 0 + Number(document.getElementById('blueRGB').value);
+
+      // Set parameters
     redRGBval.set(redcolorRGB);
     greenRGBval.set(greencolorRGB);
     blueRGBval.set(bluecolorRGB);
@@ -158,28 +166,129 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
 
     clearBackground.callService(request, function(result) {
     console.log(result);
-    });
+    }); //Clears the turtlesim background and sets the color to the value of the background parameters.
 
-      
   };
 
+  //moving turtle with on screen arrow keys
+
+  function moveup() {  
+    twist.linear.x = 1.0;
+    twist.angular.z = 0.0;
+    cmdVelTopic.publish(twist);      
+  };
+
+  function movedown() {  
+    twist.linear.x = -1.0;
+    twist.angular.z = 0.0;
+    cmdVelTopic.publish(twist);      
+  };
+
+  function turnleft() {  
+    twist.linear.x = 0.0;
+    twist.angular.z = 1.570796;
+    cmdVelTopic.publish(twist);      
+  };
+
+  function turnright() {  
+    twist.linear.x = 0;
+    twist.angular.z = -1.570796;
+    cmdVelTopic.publish(twist);      
+  };
+
+  //moving turtle with keyboard arrows
+  document.onkeydown = function(e) {
+    e = e || window.event;
+    switch(e.which || e.keyCode) {
+        case 37: turnleft()// left
+        break;
+
+        case 38: moveup()// up
+        break;
+
+        case 39: turnright()// right
+        break;
+
+        case 40: movedown()// down
+        break;
+
+        default: return; // exit this handler for other keys
+    }
+    e.preventDefault(); // prevent the default action (scroll / move caret)
+  };
 
 
 </script>
 </head>
 
 <body>
+
+<p><font size="5">Move the turtle!</font></p>
+
+
 <form name="ctrlPanel">
 <p>Enter positive or negative numeric decimal values in the boxes below</p>
 <table>
     <tr><td>Linear X</td><td><input id="linearXText" name="linearXText" type="text" value="1.5"/></td></tr>
     <tr><td>Angular Z</td><td><input id="angularZText" name="angularZText" type="text" value="1.5"/></td></tr>
-    <tr><td>Red RGB value</td><td><input id="redRGB" name="redRGB" type="text" value="69"/></td></tr>
-    <tr><td>Green RGB value</td><td><input id="greenRGB" name="greenRGB" type="text" value="86"/></td></tr>
-    <tr><td>Blue RGB value</td><td><input id="blueRGB" name="blueRGB" type="text" value="255"/></td></tr>
 </table>
+
 <button id="sendMsg" type="button" onclick="pubMessage()">Publish Message</button>
+
+<p></p>
+<p></p>
+<p>Adjust the RGB sliders to change the background color</p>
+
+<table>
+    <tr><td>Red RGB value (0-255)</td><td><input id="redRGB" name="redRGB" type="range" min = "0" max = "255" value="69"/></td></tr>
+    <tr><td>Green RGB value (0-255)</td><td><input id="greenRGB" name="greenRGB" type="range" min = "0" max = "255" value="86"/></td></tr>
+    <tr><td>Blue RGB value (0-255)</td><td><input id="blueRGB" name="blueRGB" type="range" min = "0" max = "255" value="255"/></td></tr>
+</table>
+
+<button id="sendMsg" type="button" onclick="backgroundMessage()">Change Background Color</button>
+
+
+<p> Click arrow keys or use keyboard keys </p>
+
+<style>
+  button.pos_left {
+    position: absolute;
+    left: 20px;
+    top: 390px;
+  }
+  button.pos_right{
+    position: absolute;
+    left: 75px;
+    top: 390px;
+  }
+  button.pos_up{
+    position: absolute;
+    left: 50px;
+    top: 365px;
+  }
+  button.pos_down{
+    position: absolute;
+    left: 50px;
+    top: 390px;
+  }
+  div.Websocket{
+    position: absolute;
+    top: 415px;
+  }
+
+</style>  
+
+<p>
+  <button id="up" type="button" class = "pos_up" onclick="moveup()">&#8593;</button>
+  <button id="left" type="button" class = "pos_left" onclick="turnleft()">&#8592;</button>
+  <button id="down" type="button" class = "pos_down" onclick="movedown()">&#8595;</button>
+  <button id="right" type="button" class = "pos_right" onclick="turnright()">&#8594;</button>
+</p>
+
+
 </form>
-<div id="feedback"></div>
+<p></p>
+<p></p>
+<div id="feedback" class="Websocket"></div>
 </body>
 </html>
