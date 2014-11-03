@@ -17,7 +17,8 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
 
   // This function connects to the rosbridge server running on the local computer on port 9090
   var rbServer = new ROSLIB.Ros({
-    url : 'ws://localhost:9090'
+    //url : 'ws://localhost:9090' - this is to use your own computer
+    url : 'ws://192.168.0.104:9090' //this is for other people to connect to your computer, 192.168.0.104 was found from typing ifconfig into terminal
   });
 
   // This function is called upon the rosbridge connection event
