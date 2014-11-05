@@ -49,6 +49,102 @@ Our first task was to get `turtlesim` to run on a web browser hosted locally.
 We found code on this site, [Iguanatronics](http://iguanatronics.com/igtron/?p=313), that showed how to create an HTML webpage, stored on our local computer, to control `turtlesim` via submitting commands to `cmd_vel` topic. This meant that allowing remote publish/subscribe was very easy. However, to complete basic functionality of our project, we still needed to figure out how to do service calls, get/set parameters, and for the extension task, figure out how to connect the website on the internet to our `turtlesim` node. 
 
 Conceptually, on a computer with an active `turtlesim` node, we used the ROS package `rosbridge` to connect to WebSocket, which is a protocol that allows remote devices to communicate to a web browser. This in turn connected to a website where we wrote a user interface to control `cmd_vel`. 
+
+To replicate what we did: after running `roscore` and opening the `turtlesim` node with
+    
+    rosrun turtlesim turtlesim_node
+    
+we installed `rosbridge`:
+
+    sudo apt-get install ros-indigo-rosbridge-suite
+    
+Then we launched `rosbridge` with
+
+    roslaunch rosbridge_server rosbridge_websocket.launch
+  
+  
+*2. The HTML webpage*
+    
+Next, we created an HTML file to create a website on our local machine. In our website's HTML file, we import the necessary Javascript libraries, which are:
+
+* `roslibjs` to write certain ROS functions for the HTML website
+
+* EventEmitter2, something that allows us to emit "events" back to ROS, written in Javascript with Node.js, an open-source app building environment.
+
+~~~html
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+    <script type="text/javascript" type="text/javascript">
+~~~
+
+
+*3. Connecting to rosbridge*
+
+Next, there is some documented code on connecting, disconnecting, or error in connecting to `rosbridge`.
+
+~~~javascript    
+	// This function connects to the rosbridge server running on the local computer on port 9090
+	var rbServer = new ROSLIB.Ros({
+    url : 'ws://localhost:9090'
+	});
+
+    // This function is called upon the rosbridge connection event
+    rbServer.on('connection', function() {
+    // Write appropriate message to #feedback div when successfully connected to rosbridge
+    var fbDiv = document.getElementById('feedback');
+    fbDiv.innerHTML += "<p>Connected to websocket server.</p>";
+    });
+
+    // This function is called when there is an error attempting to connect to rosbridge
+    rbServer.on('error', function(error) {
+    // Write appropriate message to #feedback div upon error when attempting to connect to rosbridge
+    var fbDiv = document.getElementById('feedback');
+    fbDiv.innerHTML += "<p>Error connecting to websocket server.</p>";
+    });
+
+    // This function is called when the connection to rosbridge is closed
+    rbServer.on('close', function() {
+    // Write appropriate message to #feedback div upon closing connection to rosbridge
+    var fbDiv = document.getElementById('feedback');
+    fbDiv.innerHTML += "<p>Connection to websocket server closed.</p>";
+    });
+~~~  
+
+
+*4. Publishing messages to a topic in ROS through `rosbridge`*
+    
+Now we write the functions to create a topic and write messages to ROS. You can name the message anything you want by replacing `rbserver` with the name of your message. This name will be called later on.
+
+~~~javascript
+// These lines create a topic object as defined by roslibjs
+  var cmdVelTopic = new ROSLIB.Topic({
+    ros : rbServer,
+    name : '/turtle1/cmd_vel',
+    messageType : 'geometry_msgs/Twist'
+  });
+
+  // These lines create a message that conforms to the structure of the Twist defined in our ROS installation
+  // It initalizes all properties to zero. They will be set to appropriate values before we publish this message.
+  var twist = new ROSLIB.Message({
+    linear : {
+      x : 0.0,
+      y : 0.0,
+      z : 0.0
+    },
+    angular : {
+      x : 0.0,
+      y : 0.0,
+      z : 0.0
+    }
+  });
+~~~
+
+
+Now we write the function to take the numeric value for the Twist objects and publish them to the `cmd_vel` topic in ROS, controlling the `turtlesim`.
+
 ~~~javascript
  /* This function:
 	- retrieves numeric values from the text boxes
@@ -82,7 +178,219 @@ Conceptually, on a computer with an active `turtlesim` node, we used the ROS pac
 *5. Calling a service in ROS*
     
 This service is needed later on so we can change the background color of `turtlesim`. We need to clear the existing color of the background before we can set it as a parameter. 
+
+~~~javascript
+    // Calling a service
+    // -----------------
+    //These lines create a service object as defined by roslibjs
+    //services for turtlesim can be found on http://wiki.ros.org/turtlesim
+    var clearBackground = new ROSLIB.Service({
+    ros : rbServer,
+    name : '/clear',
+    serviceType : 'std_srvs/Empty'
+    });
+
+    var request = new ROSLIB.ServiceRequest({ //the clear service doesn't take in any parameters
+    });
+~~~
+
+
+*6. Creating and setting parameters in ROS*
+
+Although `turtlesim`'s velocity and angular velocity can be changed through a topic message, the background color cannot. It is instead a parameter, which can be cleared and re-set. The following function takes the color that the webpage console specifies and creates the parameters that set the background color.
+
+~~~javascript
+
+  // Creating parameters
+  // ---------------------------------
+  //parameters for turtlesim can be found on http://wiki.ros.org/turtlesim
+    // Set the appropriate values on the message object
+    twist.linear.x = linearX;
+    twist.angular.z = angularZ;
+
+    // Publish the message 
+    cmdVelTopic.publish(twist);
+       
+  };
+
+  /* This function:
+  - retrieves numeric values from the sliders
+  - assigns these values to the appropriate parameters
+  - calls the clear service to reset the background color
+  */
+  function backgroundMessage(){
+
+    //getting the values from the sliders
+    redcolorRGB = 0 + Number(document.getElementById('redRGB').value);
+    greencolorRGB = 0 + Number(document.getElementById('greenRGB').value);
+    bluecolorRGB = 0 + Number(document.getElementById('blueRGB').value);
+
+      // Set parameters
+    redRGBval.set(redcolorRGB);
+    greenRGBval.set(greencolorRGB);
+    blueRGBval.set(bluecolorRGB);
+  
+    //Publishes the values of the parameters to the webpage console
+    redRGBval.get(function(value) {
+    console.log('Red RGB VAL: ' + value);
+    });
+
+    greenRGBval.get(function(value) {
+    console.log('Green RGB VAL: ' + value);
+    });
+
+    blueRGBval.get(function(value) {
+    console.log('Blue RGB VAL: ' + value);
+    });
+
+    //Calls the clear service to clear the turtlesim background and set the color to the values of the background parameters
+    clearBackground.callService(request, function(result) {
+    console.log(result);
+    }); 
+
+  };
+
+~~~
+
+*7. Creating a control panel for the webpage*
+
+Lastly, we create the control panel to write values for the `turtlesim` via our webpage that publishes its messages to our script, before we end the HTML. There are several components for the web console and they are listed below.
+
+First, the following controls the linear and angular velocity of the turtle by user input of numbers. This mimics sending a message to the turtle with specific Twist values.
+
+~~~HTML
+<body>
+<form name="ctrlPanel">
+<p>Enter positive or negative numeric decimal values in the boxes below</p>
+<table>
+    <tr><td>Linear X</td><td><input id="linearXText" name="linearXText" type="text" value="1.5"/></td></tr>
+    <tr><td>Angular Z</td><td><input id="angularZText" name="angularZText" type="text" value="1.5"/></td></tr>
+</table>
+<button id="sendMsg" type="button" onclick="pubMessage()">Publish Message</button>
+</form>
+<div id="feedback"></div>
+</body>
+</html>
+~~~
+
 Next, we wanted to control the turtle with arrow keys. We created visual arrow keys for the website as well as functionality for when the arrow keys on the keyboard are pressed. The following code controls the turtle. Forward and backward motion gives the turtle a spatial velocity of 1 and left/right turns the turtle counterclockwise/clockwise by π/2 (about 1.57) rad, numbers we just made up.
+
+~~~javascript
+/* These functions:
+  - moves the turtle after the onscreen or keyboard arrow keys are pressed
+   */
+  function moveup() {  
+    twist.linear.x = 1.0;
+    twist.angular.z = 0.0;
+    cmdVelTopic.publish(twist);      
+  };
+
+  function movedown() {  
+    twist.linear.x = -1.0;
+    twist.angular.z = 0.0;
+    cmdVelTopic.publish(twist);      
+  };
+
+  function turnleft() {  
+    twist.linear.x = 0.0;
+    twist.angular.z = 1.570796;
+    cmdVelTopic.publish(twist);      
+  };
+
+  function turnright() {  
+    twist.linear.x = 0;
+    twist.angular.z = -1.570796;
+    cmdVelTopic.publish(twist);      
+  };
+~~~
+
+Here is the code that detects whether the arrow keys are pressed, and controls the turtle through them.
+
+~~~javascript
+ /* This function:
+  - detects when an arrow key is pressed down
+  - calls the appropriate turn/move functions from above to move the turtle
+  */
+  document.onkeydown = function(e) {
+    e = e || window.event;
+    switch(e.which || e.keyCode) {
+        case 37: turnleft()// left
+        break;
+
+        case 38: moveup()// up
+        break;
+
+        case 39: turnright()// right
+        break;
+
+        case 40: movedown()// down
+        break;
+
+        default: return; // exit this handler for other keys
+    }
+    e.preventDefault(); // prevent the default action (scroll / move caret)
+  };
+~~~
+
+
+As we mentioned above, we wanted to allow control of the turtle through keyboard arrow keys or arrow key graphics on the webpage. Here we create the styles that controlled the size and position of the arrow key buttons.
+
+~~~html
+ 	<style>
+	 button.pos_left {
+	   position: absolute;
+	   left: 20px;
+	   top: 350px;
+	 }
+	 button.pos_right{
+	   position: absolute;
+	   left: 75px;
+	   top: 350px;
+	 }
+	 button.pos_up{
+	   position: absolute;
+	   left: 50px;
+	   top: 325px;
+	 }
+	 button.pos_down{
+	   position: absolute;
+	   left: 50px;
+	   top: 350px;
+	 }
+	
+	</style>
+~~~
+
+The actual keys that use this functionality are coded by the following block of code. These can be placed anywhere in the HTML depending on where you want the buttons to be.
+
+~~~html
+	<p>
+	  <button id="up" type="button" class = "pos_up" onclick="moveup()">&#8593;</button>
+	  <button id="left" type="button" class = "pos_left" onclick="turnleft()">&#8592;</button>
+	  <button id="down" type="button" class = "pos_down" onclick="movedown()">&#8595;</button>
+	  <button id="right" type="button" class = "pos_right" onclick="turnright()">&#8594;</button>
+	</p>
+~~~
+
+
+Finally, the following code ends the HTML page:
+
+~~~html
+
+</form>
+<p></p>
+<p></p>
+<div id="feedback" class="Websocket"></div>
+</body>
+</html>
+~~~
+
+*8. Launch file*
+
+Because this process needs several nodes running, to execute them easily, we created a .launch file which would automatically start `roscore`, WebSocket, `turtlesim_node`, and `turtle_teleop_key`. A user would need to run this launch file after opening the HTML webpage (or refresh the HTML page, if that was opened _before_ running the .launch file). The launch file is included in our repository.
+
+*9. Extension - Remote Control of Turtlesim*
+
 Our first task was to control `turtlesim` locally from an HTML page. For our second task, we wanted to give control of the 'turtlesim' on our local computer to anyone online. To test our idea, we put the HTML code on a free site builder, [rwebtools.weebly.com](rwebtools.weebly.com), which allowed us to control our running `turtlesim_node` (with WebSocket, `roscore` running) with our own computer.
 
 
