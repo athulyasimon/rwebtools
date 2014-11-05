@@ -17,8 +17,8 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
 
   // This function connects to the rosbridge server running on the local computer on port 9090
   var rbServer = new ROSLIB.Ros({
-    //url : 'ws://localhost:9090' - this is to use your own computer
-    url : 'ws://192.168.0.104:9090' //this is for other people to connect to your computer, 192.168.0.104 was found from typing ifconfig into terminal
+    url : 'ws://localhost:9090' //this is to use your own computer
+    //url : 'ws://192.168.0.104:9090' //this is for other people to connect to your computer, 192.168.0.104 was found from typing ifconfig into terminal
   });
 
   // This function is called upon the rosbridge connection event
@@ -41,12 +41,15 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
     var fbDiv = document.getElementById('feedback');
     fbDiv.innerHTML += "<p>Connection to websocket server closed.</p>";
   });
-
+  
+   //Creating a topic
+  // ----------------- 
 
   // These lines create a topic object as defined by roslibjs
+  //topics for turtlesim can be found on http://wiki.ros.org/turtlesim
   var cmdVelTopic = new ROSLIB.Topic({
     ros : rbServer, //rbServer comes from ROSLIB.Ros in line 19
-    name : '/turtle1/cmd_vel',
+    name : '/turtle1/cmd_vel', 
     messageType : 'geometry_msgs/Twist'
   });
 
@@ -67,26 +70,23 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
 
     // Calling a service
   // -----------------
-
+  //These lines create a service object as defined by roslibjs
+  //services for turtlesim can be found on http://wiki.ros.org/turtlesim
   var clearBackground = new ROSLIB.Service({
     ros : rbServer,
     name : '/clear',
     serviceType : 'std_srvs/Empty'
   });
 
-  var request = new ROSLIB.ServiceRequest({
+  var request = new ROSLIB.ServiceRequest({ //the clear service doesn't take in any parameters
    
   });
 
   
 
-  // Getting and setting a param value
+  // Creating parameters
   // ---------------------------------
-
-  /*rbServer.getParams(function(params) {
-    console.log(params);
-  });*/
-
+  //parameters for turtlesim can be found on http://wiki.ros.org/turtlesim
   var redRGBval = new ROSLIB.Param({
     ros : rbServer,
     name : 'background_r'
@@ -104,7 +104,6 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
 
   
 
-  
 
   /* This function:
 	- retrieves numeric values from the text boxes
@@ -125,24 +124,23 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
     linearX = 0 + Number(document.getElementById('linearXText').value);
     angularZ = 0 + Number(document.getElementById('angularZText').value);
 
-    
-
     // Set the appropriate values on the message object
     twist.linear.x = linearX;
     twist.angular.z = angularZ;
 
-      
-
     // Publish the message 
     cmdVelTopic.publish(twist);
-
        
   };
 
-
+  /* This function:
+  - retrieves numeric values from the sliders
+  - assigns these values to the appropriate parameters
+  - calls the clear service to reset the background color
+  */
   function backgroundMessage(){
 
-    //setting background color for turtlesim
+    //getting the values from the sliders
     redcolorRGB = 0 + Number(document.getElementById('redRGB').value);
     greencolorRGB = 0 + Number(document.getElementById('greenRGB').value);
     bluecolorRGB = 0 + Number(document.getElementById('blueRGB').value);
@@ -152,7 +150,7 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
     greenRGBval.set(greencolorRGB);
     blueRGBval.set(bluecolorRGB);
   
-
+    //Publishes the values of the parameters to the webpage console
     redRGBval.get(function(value) {
     console.log('Red RGB VAL: ' + value);
     });
@@ -165,14 +163,16 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
     console.log('Blue RGB VAL: ' + value);
     });
 
+    //Calls the clear service to clear the turtlesim background and set the color to the values of the background parameters
     clearBackground.callService(request, function(result) {
     console.log(result);
-    }); //Clears the turtlesim background and sets the color to the value of the background parameters.
+    }); 
 
   };
 
-  //moving turtle with on screen arrow keys
-
+  /* These functions:
+  - moves the turtle after the onscreen or keyboard arrow keys are pressed
+   */
   function moveup() {  
     twist.linear.x = 1.0;
     twist.angular.z = 0.0;
@@ -197,7 +197,10 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
     cmdVelTopic.publish(twist);      
   };
 
-  //moving turtle with keyboard arrows
+  /* This function:
+  - detects when an arrow key is pressed down
+  - calls the appropriate turn/move functions from above to move the turtle
+  */
   document.onkeydown = function(e) {
     e = e || window.event;
     switch(e.which || e.keyCode) {
@@ -255,22 +258,22 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
   button.pos_left {
     position: absolute;
     left: 20px;
-    top: 390px;
+    top: 400px;
   }
   button.pos_right{
     position: absolute;
     left: 75px;
-    top: 390px;
+    top: 400px;
   }
   button.pos_up{
     position: absolute;
     left: 50px;
-    top: 365px;
+    top: 375px;
   }
   button.pos_down{
     position: absolute;
     left: 50px;
-    top: 390px;
+    top: 400px;
   }
   div.Websocket{
     position: absolute;
@@ -279,12 +282,14 @@ The next two lines bring in the JavaScript files that support rosbridge integrat
 
 </style>  
 
+<div>
 <p>
   <button id="up" type="button" class = "pos_up" onclick="moveup()">&#8593;</button>
   <button id="left" type="button" class = "pos_left" onclick="turnleft()">&#8592;</button>
   <button id="down" type="button" class = "pos_down" onclick="movedown()">&#8595;</button>
   <button id="right" type="button" class = "pos_right" onclick="turnright()">&#8594;</button>
 </p>
+</div>
 
 
 </form>
