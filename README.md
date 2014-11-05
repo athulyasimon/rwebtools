@@ -83,13 +83,14 @@ Next, we created an HTML file to create a website on our local machine. In our w
 
 *3. Connecting to rosbridge*
 
-Next, there is some documented code on connecting, disconnecting, or error in connecting to `rosbridge`.
+Next, there is some documented code on connecting, disconnecting, or error in connecting to `rosbridge`. We first need to create a Ros node object to communicate with a rosbridge server. You can name the Ros node anything you want by replacing `rbserver` with the name of your node. This name will be used later on. In this example, the script will connect to localhost on the default port of 9090. If you would like other computers to be able to connect to your computer over a local network replace the localhost with your computer's internet address (example shown in the url code that is commented out).
 
 ~~~javascript    
-	// This function connects to the rosbridge server running on the local computer on port 9090
-	var rbServer = new ROSLIB.Ros({
-    url : 'ws://localhost:9090'
-	});
+    // This function connects to the rosbridge server running on the local computer on port 9090
+    var rbServer = new ROSLIB.Ros({
+    url : 'ws://localhost:9090' //this is to use your own computer
+    //url : 'ws://192.168.0.104:9090' //this is for other people to connect to your computer, 192.168.0.104 was found from typing ifconfig into terminal
+    });
 
     // This function is called upon the rosbridge connection event
     rbServer.on('connection', function() {
@@ -116,12 +117,13 @@ Next, there is some documented code on connecting, disconnecting, or error in co
 
 *4. Publishing messages to a topic in ROS through `rosbridge`*
     
-Now we write the functions to create a topic and write messages to ROS. You can name the message anything you want by replacing `rbserver` with the name of your message. This name will be called later on.
+Now we write the functions to create a topic and create a message to ROS. 
 
 ~~~javascript
 // These lines create a topic object as defined by roslibjs
+//topics for turtlesim can be found on http://wiki.ros.org/turtlesim
   var cmdVelTopic = new ROSLIB.Topic({
-    ros : rbServer,
+    ros : rbServer, //rbServer comes from the name of your ROS node
     name : '/turtle1/cmd_vel',
     messageType : 'geometry_msgs/Twist'
   });
@@ -195,7 +197,7 @@ This service is needed later on so we can change the background color of `turtle
 ~~~
 
 
-*6. Creating and setting parameters in ROS*
+*6. Creating/setting parameters and calling a service in ROS*
 
 Although `turtlesim`'s velocity and angular velocity can be changed through a topic message, the background color cannot. It is instead a parameter, which can be cleared and re-set. The following function takes the color that the webpage console specifies and creates the parameters that set the background color.
 
@@ -204,14 +206,21 @@ Although `turtlesim`'s velocity and angular velocity can be changed through a to
   // Creating parameters
   // ---------------------------------
   //parameters for turtlesim can be found on http://wiki.ros.org/turtlesim
-    // Set the appropriate values on the message object
-    twist.linear.x = linearX;
-    twist.angular.z = angularZ;
+  var redRGBval = new ROSLIB.Param({
+    ros : rbServer,
+    name : 'background_r'
+  });
 
-    // Publish the message 
-    cmdVelTopic.publish(twist);
-       
-  };
+  var greenRGBval = new ROSLIB.Param({
+    ros : rbServer,
+    name : 'background_g'
+  });
+
+  var blueRGBval = new ROSLIB.Param({
+    ros : rbServer,
+    name : 'background_b'
+  });
+
 
   /* This function:
   - retrieves numeric values from the sliders
@@ -373,16 +382,12 @@ The actual keys that use this functionality are coded by the following block of 
 ~~~
 
 
-Finally, the following code ends the HTML page:
+Finally, the following piece of code publishes a message to the webpage allowing you to know if the html file has properly connected to the Websocket server.
 
 ~~~html
 
-</form>
-<p></p>
-<p></p>
 <div id="feedback" class="Websocket"></div>
-</body>
-</html>
+
 ~~~
 
 *8. Launch file*
@@ -397,7 +402,7 @@ Our first task was to control `turtlesim` locally from an HTML page. For our sec
 Next, we tried running `turtlesim` over each other's computer via Ethernet. But we ran into some problems and this did not work (see **Difficulties We Faced** section).
 
 
-Finally, we were able to give control of our local turtle to an online webpage by changing `localhost` from the line `url : 'ws://localhost:9090'` to our IP address. This seemed to work regardless of which wireless network we were on, although we ran into some strange behavior, which is also noticed in the **Difficulties We Faced** section. Both online control of the turtle on your local computer (assuming the appropriate nodes are running, e.g. from running the launch file) as well as control of Athulya's turtle from any computer with internet connection are on our website, [rwebtools.weebly.com](rwebtools.weebly.com).
+Finally, we were able to give control of our local turtle to an online webpage by changing `localhost` from the line `url : 'ws://localhost:9090'` to our IP address. This seemed to work on a local network, although we ran into some strange behavior with Northwestern's network, which is also noticed in the **Difficulties We Faced** section. Both online control of the turtle on your local computer (assuming the appropriate nodes are running, e.g. from running the launch file) as well as control of Athulya's turtle from any computer with local network internet connection are on our website, [rwebtools.weebly.com](rwebtools.weebly.com).
 
 ####5. Difficulties We Faced
 
@@ -409,7 +414,7 @@ We tried to run `turtlesim` over each other's computer via Ethernet cable. Howev
 * Another classmate's laptop didn't work, giving an error that something was not defined in EventEmitter, which was the package that emitted "events" from the HTML back through WebSocket and `rosbridge`. This is probably regarding Ethernet connection.
 
 
-Another problem we had was when we tried to control the turtle online remotely. In the code in the HTML, we changed `localhost` to our IP address. The result was that over the Northwestern University network, some IP addresses worked and allowed remote control of the turtle from another computer, but some addresses didn't. We have no idea why. 
+Another problem we had was when we tried to control the turtle online remotely. In the code in the HTML, we changed `localhost` to our IP address. The result was that if we used our IP address over the Northwestern University network you could still connect to our computer even if you weren't on Northwestern's local network. But if you used the IP address connected to a local router then only computers on that local network were able to remotely control the turtle.  
 
 ####6. Mistakes We Found in Existing Code
 None, though `rosbridge` was sparsely documented and had few tutorials. 
