@@ -38,6 +38,15 @@ To do this, we needed to figure out how to publish and subscribe topics, get and
 * a launch file we wrote to run all the nodes quickly and easily
 * Weebly.com, a free site creator to host our site
 
+In order to run all the example html files you must have the turtlesim, rosbridge-server, and tf2-web-publisher packages
+
+~~~bash
+sudo apt-get install ros-indigo-turtlesim
+sudo apt-get install ros-indigo-rosbridge-server
+sudo apt-get install ros-indigo-tf2-web-publisher
+~~~
+
+
 ####3. Results
 We were able to complete basic functionality and control the `turtlesim` on the same local computer, from a web GUI. In addition, we completed the first extension task of allowing another computer control `turtlesim` remotely with just connection to the webpage. Both projects are on our website, [rwebtools.weebly.com](rwebtools.weebly.com). We were not able to complete the extension of putting `rviz` online - that would probably take another several weeks.
 
@@ -65,7 +74,7 @@ Then we launched `rosbridge` with
   
 *2. The HTML webpage*
     
-Next, we created an HTML file to create a website on our local machine. In our website's HTML file, we import the necessary Javascript libraries, which are:
+Next, we created an HTML file to create a website on our local machine. The complete HTML file can be found in the iguanaturtle.html file. In our website's HTML file, we import the necessary Javascript libraries, which are:
 
 * `roslibjs` to write certain ROS functions for the HTML website
 
@@ -265,7 +274,7 @@ Although `turtlesim`'s velocity and angular velocity can be changed through a to
 
 Lastly, we create the control panel to write values for the `turtlesim` via our webpage that publishes its messages to our script, before we end the HTML. There are several components for the web console and they are listed below.
 
-First, the following controls the linear and angular velocity of the turtle by user input of numbers. This mimics sending a message to the turtle with specific Twist values.
+First, the following controls the linear and angular velocity of the turtle by user input of numbers. This mimics sending a message to the turtle with specific Twist values. The onclick="pubMessage()" connects to the pubMessage function shown above in step 4. 
 
 ~~~HTML
 <body>
@@ -342,35 +351,39 @@ Here is the code that detects whether the arrow keys are pressed, and controls t
 ~~~
 
 
-As we mentioned above, we wanted to allow control of the turtle through keyboard arrow keys or arrow key graphics on the webpage. Here we create the styles that controlled the size and position of the arrow key buttons.
+As we mentioned above, we wanted to allow control of the turtle through keyboard arrow keys or arrow key graphics on the webpage. Here we create the styles that controlled the position of the arrow key buttons as well as the position of the text found under the buttons.
 
 ~~~html
- 	<style>
-	 button.pos_left {
-	   position: absolute;
-	   left: 20px;
-	   top: 350px;
-	 }
-	 button.pos_right{
-	   position: absolute;
-	   left: 75px;
-	   top: 350px;
-	 }
-	 button.pos_up{
-	   position: absolute;
-	   left: 50px;
-	   top: 325px;
-	 }
-	 button.pos_down{
-	   position: absolute;
-	   left: 50px;
-	   top: 350px;
-	 }
-	
-	</style>
+ <style>
+  button.pos_left {
+    position: absolute;
+    left: 20px;
+    top: 400px;
+  }
+  button.pos_right{
+    position: absolute;
+    left: 75px;
+    top: 400px;
+  }
+  button.pos_up{
+    position: absolute;
+    left: 50px;
+    top: 375px;
+  }
+  button.pos_down{
+    position: absolute;
+    left: 50px;
+    top: 400px;
+  }
+  div.Websocket{
+    position: absolute;
+    top: 415px;
+  }
+
+</style>
 ~~~
 
-The actual keys that use this functionality are coded by the following block of code. These can be placed anywhere in the HTML depending on where you want the buttons to be.
+The actual keys that use this functionality are coded by the following block of code. These can be placed anywhere in the HTML depending on where you want the buttons to be. Once again, onclick="..." will connect the button with the function to control turtlesim.
 
 ~~~html
 	<p>
@@ -423,6 +436,7 @@ None, though `rosbridge` was sparsely documented and had few tutorials.
 * [`rosbridge`](http://wiki.ros.org/rosbridge_suite) page on ROS.org
 * [Iguanatronics turtlesim tutorial](http://iguanatronics.com/igtron/?p=313)
 * [`roslibjs`](http://wiki.ros.org/roslibjs) page on ROS.org - has tutorials, including for URDF parser
+* [`turtlesim`](http://wiki.ros.org/turtlesim) page on ROS.org - has information on available topics, messages, parameters, and services
 * [Robot Web Tools](http://robotwebtools.org/)
 * [Robot Management System](http://wiki.ros.org/rms) - we didn't use this for our project but it is something to explore in the future
-* Apache is also something we would explore in the future
+* Apache is also something we would explore in the future as part of a better approach to hosting our website
