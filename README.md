@@ -43,7 +43,7 @@ In order to run all the example html files you must have the turtlesim, rosbridg
 ~~~bash
 sudo apt-get install ros-indigo-turtlesim
 sudo apt-get install ros-indigo-rosbridge-server
-sudo apt-get install ros-indigo-tf2-web-publisher
+sudo apt-get install ros-indigo-tf2-web-republisher
 ~~~
 
 
