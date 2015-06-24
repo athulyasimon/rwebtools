@@ -434,7 +434,7 @@ None, though `rosbridge` was sparsely documented and had few tutorials.
 
 ####7. Useful Resources
 * [`rosbridge`](http://wiki.ros.org/rosbridge_suite) page on ROS.org
-* [Iguanatronics turtlesim tutorial](http://iguanatronics.com/igtron/?p=313)
+* [Iguanatronics turtlesim tutorial](http://iguanatronics.com)
 * [`roslibjs`](http://wiki.ros.org/roslibjs) page on ROS.org - has tutorials, including for URDF parser
 * [`turtlesim`](http://wiki.ros.org/turtlesim) page on ROS.org - has information on available topics, messages, parameters, and services
 * [Robot Web Tools](http://robotwebtools.org/)
