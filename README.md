@@ -55,7 +55,7 @@ Our first task was to get `turtlesim` to run on a web browser hosted locally.
 
 *1. Background and Overview*
 
-We found code on this site, [Iguanatronics](http://iguanatronics.com/igtron/?p=313), that showed how to create an HTML webpage, stored on our local computer, to control `turtlesim` via submitting commands to `cmd_vel` topic. This meant that allowing remote publish/subscribe was very easy. However, to complete basic functionality of our project, we still needed to figure out how to do service calls, get/set parameters, and for the extension task, figure out how to connect the website on the internet to our `turtlesim` node. 
+We found code on this site, [Iguanatronics](http://iguanatronics.com), that showed how to create an HTML webpage, stored on our local computer, to control `turtlesim` via submitting commands to `cmd_vel` topic. This meant that allowing remote publish/subscribe was very easy. However, to complete basic functionality of our project, we still needed to figure out how to do service calls, get/set parameters, and for the extension task, figure out how to connect the website on the internet to our `turtlesim` node. 
 
 Conceptually, on a computer with an active `turtlesim` node, we used the ROS package `rosbridge` to connect to WebSocket, which is a protocol that allows remote devices to communicate to a web browser. This in turn connected to a website where we wrote a user interface to control `cmd_vel`. 
 
